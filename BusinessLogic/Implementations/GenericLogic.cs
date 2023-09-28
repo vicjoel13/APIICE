@@ -23,7 +23,7 @@ namespace BusinessLogic.Implementations
 
         public IEnumerable<DOut> GetAll(IDictionary<string, object> relationalIds = null)
         {
-            var baseQuery = _genericRepository.GetAll(); ;
+            var baseQuery = _genericRepository.GetAll(null); ;
             if (relationalIds != null)
             {
                 foreach (var (key, id) in relationalIds)

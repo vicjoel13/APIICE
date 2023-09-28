@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using BusinessLogic.Models;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Models;
@@ -12,6 +13,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using EmployeeParameters = Repository.EmployeeParameters;
 
 namespace WebAPI.Controllers
 {
@@ -34,10 +36,62 @@ namespace WebAPI.Controllers
         /// Get a list of all inventory entries
         /// </summary>
         [HttpGet]
-        public async Task<ActionResult> GetAll()
+        [ResponseCache(Duration = 1)]
+        public async Task<ActionResult> GetAll([FromQuery]EmployeeParameters employeeParameters)
         {
-
+            
             var ListProducts = InventoryRepository.GetAll().ToList();
+
+            ListProducts = ListProducts.Where(x => x.is_season_flavor == employeeParameters.is_season_flavor).ToList();
+
+            if (employeeParameters.MaxDate != DateTime.MinValue && employeeParameters.MinDate != DateTime.MinValue)
+            {
+                ListProducts = ListProducts.Where(x => x.Date > employeeParameters.MinDate && x.Date < employeeParameters.MaxDate).ToList();
+            }
+
+            // Manejar atributo numérico (Quantity)
+            if (employeeParameters.signo == 1)
+            {
+                ListProducts = ListProducts.Where(x => x.quantity > employeeParameters.quantity).ToList();
+            }
+
+            if (employeeParameters.signo == 2)
+            {
+                ListProducts = ListProducts.Where(x => x.quantity < employeeParameters.quantity).ToList();
+            }
+
+            if (employeeParameters.signo == 3)
+            {
+                ListProducts = ListProducts.Where(x => x.quantity == employeeParameters.quantity).ToList();
+            }
+
+            // Nuevas comparaciones para Quantity
+            if (employeeParameters.signo == 4)
+            {
+                ListProducts = ListProducts.Where(x => x.quantity <= employeeParameters.quantity).ToList();
+            }
+
+            if (employeeParameters.signo == 5)
+            {
+                ListProducts = ListProducts.Where(x => x.quantity >= employeeParameters.quantity).ToList();
+            }
+
+            if (employeeParameters.name != null )
+            {
+                ListProducts = ListProducts
+                    .Where(x => x.Store.Name.Contains(employeeParameters.name))
+                    .ToList();
+            }
+
+            if (employeeParameters.flavor != null)
+            {
+                ListProducts = ListProducts
+                    .Where(x => x.Flavor.Contains(employeeParameters.flavor))
+                    .ToList();
+            }
+
+            ListProducts= ListProducts.Skip((employeeParameters.PageNumber - 1) * employeeParameters.PageSize)
+                .Take(employeeParameters.PageSize).ToList();
 
             return Ok(ListProducts);
         }

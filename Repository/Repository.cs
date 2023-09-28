@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 using Models;
@@ -129,6 +130,17 @@ namespace Repository
         public void SaveChanges()
         {
             Context.SaveChanges();
+        }
+
+        public IQueryable<T> GetAll(EmployeeParameters employeeParameters)
+        {
+
+
+            var result = GetAll()
+                .Skip((employeeParameters.PageNumber - 1) * employeeParameters.PageSize)
+                .Take(employeeParameters.PageSize);
+
+            return result;
         }
     }
 }

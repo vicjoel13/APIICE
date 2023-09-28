@@ -131,6 +131,7 @@ namespace WebAPI
             services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
             services.AddScoped(typeof(IGenericLogic<,,>), typeof(GenericLogic<,,>));
 
+            services.AddResponseCaching();
 
             services.AddTransient<IMailService, SmtpMailService>();
 
@@ -152,6 +153,8 @@ namespace WebAPI
             if (env.IsDevelopment()) app.UseDeveloperExceptionPage();
             else app.UseHsts();
             app.UseMiddleware(typeof(ErrorHandlingMiddleware));
+            app.UseResponseCaching();
+
             app.UseCors(x => x
                 .AllowAnyOrigin()
                 .AllowAnyMethod()
