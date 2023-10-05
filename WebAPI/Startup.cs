@@ -28,6 +28,9 @@ using System.Reflection;
 using System.Text;
 using WebAPI.GenericControllerCreator;
 using WebAPI.Middleware;
+using GraphQL.Types;
+using GraphQL.Server.Ui.Playground;
+
 
 namespace WebAPI
 {
@@ -48,6 +51,10 @@ namespace WebAPI
                 options.CheckConsentNeeded = _ => true;
                 options.MinimumSameSitePolicy = SameSiteMode.None;
             });
+
+            services.AddSingleton<ISchema, InventorySchema>();
+
+            services.AddScoped<ISchema, InventorySchema>();
 
             services.AddControllers().AddNewtonsoftJson();
 
@@ -154,6 +161,7 @@ namespace WebAPI
             else app.UseHsts();
             app.UseMiddleware(typeof(ErrorHandlingMiddleware));
             app.UseResponseCaching();
+            app.UseGraphQLPlayground();
 
             app.UseCors(x => x
                 .AllowAnyOrigin()
